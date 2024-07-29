@@ -1,0 +1,6 @@
+﻿services:
+  healthpadiwebapi:
+    image: healthpadiwebapi
+    build:
+      context: .
+      dockerfile: HealthPadiWebApi/Dockerfile
