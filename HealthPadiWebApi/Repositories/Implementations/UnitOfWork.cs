@@ -5,22 +5,22 @@ namespace HealthPadiWebApi.Repositories.Implementations
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private readonly HealthPadiDataContext dbContext;
+        private readonly HealthPadiDataContext _dbContext;
 
         public UnitOfWork(HealthPadiDataContext dbContext)
         {
-            this.dbContext = dbContext;
+            _dbContext = dbContext;
             Report = new ReportRepository(dbContext);
         }
         public IReportRepository Report { get; private set; }
 
         public async Task CompleteAsync()
         {
-            await dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
         public void Dispose()
         {
-            dbContext.Dispose();
+            _dbContext.Dispose();
         }
     }
 }

@@ -7,14 +7,14 @@ namespace HealthPadiWebApi.Repositories.Implementations
 {
     public class ReportRepository : GenericRepository<Report>, IReportRepository
     {
-        protected DbSet<Report> dbSet;
+        protected DbSet<Report> _dbSet;
         public ReportRepository(HealthPadiDataContext dbContext) : base(dbContext)
         {
-            this.dbSet = dbContext.Set<Report>();
+            _dbSet = dbContext.Set<Report>();
         }
         public async Task<Report> UpdateReport(Guid id, Report report)
         {
-            var existingReport = await this.dbSet.FirstOrDefaultAsync(x => x.ReportId == id);
+            var existingReport = await _dbSet.FirstOrDefaultAsync(x => x.ReportId == id);
             if (existingReport == null)
             {
                 return null;

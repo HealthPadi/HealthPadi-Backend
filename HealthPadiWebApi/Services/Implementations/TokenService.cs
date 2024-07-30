@@ -10,11 +10,11 @@ namespace HealthPadiBackend.Services.Implementations
 {
     public class TokenService : ITokenService
     {
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
 
         public TokenService(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            _configuration = configuration;
         }
         public string CreateJWTToken(User user, List<string> roles)
         {
@@ -30,7 +30,7 @@ namespace HealthPadiBackend.Services.Implementations
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
             }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["TokenKey"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             //Creating the token descriptor

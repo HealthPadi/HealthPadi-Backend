@@ -1,6 +1,7 @@
 ﻿using HealthPadiBackend.Services.Implementations;
 using HealthPadiWebApi.Data;
 using HealthPadiWebApi.Models;
+using HealthPadiWebApi.Services.Implementations;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,7 @@ namespace HealthPadiWebApi.Extensions
                     };
                 });
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAccountService, AccountService>();
             return services;
 
         }

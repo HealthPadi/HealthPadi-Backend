@@ -3,6 +3,8 @@ using HealthPadiWebApi;
 using HealthPadiWebApi.Extensions;
 using HealthPadiWebApi.Data;
 using HealthPadiWebApi.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 
 namespace HealthPadiWebApi;
 
@@ -14,6 +16,7 @@ public class Program
 
         // Registers controllers and set up authorization policies.
         builder.Services.AddControllers();
+        
 
         //Using the Extensions
         builder.Services.AddApplicationServices(builder.Configuration);
@@ -68,8 +71,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-        app.UseMiddleware<GlobalJsonRequestFormatRequirementMiddleware>();
+        /*app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+        app.UseMiddleware<GlobalJsonRequestFormatRequirementMiddleware>();*/
         app.Run();
     }
 
