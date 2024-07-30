@@ -1,3 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using HealthPadiWebApi;
+using HealthPadiWebApi.Extensions;
+using HealthPadiWebApi.Data;
+using HealthPadiWebApi.Middlewares;
+
 namespace HealthPadiWebApi;
 
 public class Program
@@ -6,14 +12,50 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
+        // Registers controllers and set up authorization policies.
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+        //Using the Extensions
+        builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddIdentityServices(builder.Configuration);
+
+        builder.Services.AddAuthorization();
+
+        //configuring Swagger/OpenAPI
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        // DI for Seed 
+        builder.Services.AddTransient<Seed>();
+
+        // Add DB context
+        builder.Services.AddDbContext<HealthPadiDataContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("HealthPadiDBConnection")));
+
+
         var app = builder.Build();
+
+        if (args.Length == 1 && args[0] == "seed")
+        {
+            seedData(app).GetAwaiter().GetResult();
+        }
+
+        async Task seedData(IHost app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var service = scope.ServiceProvider.GetService<Seed>();
+                if (service != null)
+                {
+                    await service.SeedDataContext();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unable to retrieve Seed service");
+                }
+            }
+        }
+
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -23,12 +65,12 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
+        app.UseAuthentication();
         app.UseAuthorization();
-
-
         app.MapControllers();
-
+        app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+        app.UseMiddleware<GlobalJsonRequestFormatRequirementMiddleware>();
         app.Run();
     }
+
 }
