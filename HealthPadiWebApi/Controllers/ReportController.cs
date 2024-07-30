@@ -8,6 +8,7 @@ namespace HealthPadiWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+   /* [Authorize(AuthenticationSchemes = "Bearer")]*/
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
