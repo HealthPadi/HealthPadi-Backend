@@ -2,8 +2,12 @@
 using HealthPadiWebApi.DTOs;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthPadiWebApi.Controllers
 {
@@ -46,6 +50,43 @@ namespace HealthPadiWebApi.Controllers
             }
 
             return BadRequest("Username or Password Incorrect");
+        }
+
+        [HttpGet]
+        [Route("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties { RedirectUri = "api/account/google-response" };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        [Route("google-response")]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!result.Succeeded || result.Principal == null)
+            {
+                return BadRequest("Authentication failed.");
+            }
+            var claimsIdentity = result.Principal.Identity as ClaimsIdentity;
+            var email = claimsIdentity?.FindFirst(ClaimTypes.Email)?.Value;
+            var firstName = claimsIdentity?.FindFirst(ClaimTypes.GivenName)?.Value;
+            var lastName = claimsIdentity?.FindFirst(ClaimTypes.Surname)?.Value;
+
+            Console.WriteLine($"{email} >>>> {firstName} >>> {lastName}");
+
+            if (email == null || firstName == null || lastName == null)
+                return BadRequest("Incomplete information");
+
+            var loginResponse = await _accountService.LoginUserWithGoogleAsync(email, firstName, lastName);
+
+            if (loginResponse != null)
+            {
+                return Ok(loginResponse);
+            }
+
+            return BadRequest("Login Failed");
         }
     }
 }
