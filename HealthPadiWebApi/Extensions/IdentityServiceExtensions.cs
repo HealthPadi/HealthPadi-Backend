@@ -3,8 +3,12 @@ using HealthPadiWebApi.Data;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Implementations;
 using HealthPadiWebApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -32,7 +36,12 @@ namespace HealthPadiWebApi.Extensions
 
             // Add JWT Authentication
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -43,7 +52,15 @@ namespace HealthPadiWebApi.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = key
                     };
+                }).AddGoogle(googleOptions =>
+                {
+                    googleOptions.ClientId = config["Authentication:Google:ClientId"];
+                    googleOptions.ClientSecret = config["Authentication:Google:ClientSecret"];
+                    googleOptions.SaveTokens = true;
+                    //googleOptions.CallbackPath = "/api/Account/google-response";
+                   
                 });
+
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();
             return services;
