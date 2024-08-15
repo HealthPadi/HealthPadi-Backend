@@ -153,42 +153,6 @@ namespace HealthPadiWebApi
                     await _context.SaveChangesAsync();
                 }
 
-                // Seed FeedMedia
-                if (!_context.FeedMedias.Any())
-                {
-                    var feeds = await _context.Feeds.ToListAsync();
-                    var feedMedias = new List<FeedMedia>
-                    {
-                        new FeedMedia
-                        {
-                            FeedMediaId = Guid.NewGuid(),
-                            FeedId = feeds[0].FeedId,
-                            MediaUrl = "https://example.com/malaria_tips.jpg",
-                            MimeType = "image/jpeg",
-                            Extension = ".jpg"
-                        },
-                        new FeedMedia
-                        {
-                            FeedMediaId = Guid.NewGuid(),
-                            FeedId = feeds[1].FeedId,
-                            MediaUrl = "https://example.com/hydration.jpg",
-                            MimeType = "image/jpeg",
-                            Extension = ".jpg"
-                        },
-                        new FeedMedia
-                        {
-                            FeedMediaId = Guid.NewGuid(),
-                            FeedId = feeds[2].FeedId,
-                            MediaUrl = "https://example.com/flu_prevention.png",
-                            MimeType = "image/png",
-                            Extension = ".png"
-                        }
-                    };
-
-                    _context.FeedMedias.AddRange(feedMedias);
-                    await _context.SaveChangesAsync();
-                }
-
                 // Seed HealthUpdates
                 if (!_context.HealthUpdates.Any())
                 {
