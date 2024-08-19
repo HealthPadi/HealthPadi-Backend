@@ -44,6 +44,59 @@ namespace HealthPadiWebApi.Services.Implementations
 
             return null;
         }
+
+        /**
+         * LoginUserWithGoogleAsync - Completes a user's log in request using Google.
+         *                            If user doesn't exist an account is created for them
+         * @param email - the email of the user
+         * @param firstName - the first name of the user
+         * @param lastName - the last name of the user
+         * @return a LoginResponseDto containing the JWT token
+         */
+        public async Task<LoginResponseDto> LoginUserWithGoogleAsync(string email, string firstName, string lastName)
+        {
+           try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        UserName = email,
+                        Email = email,
+                        Firstname = firstName,
+                        Lastname = lastName
+                    };
+
+                    var identityResult = await _userManager.CreateAsync(user);
+
+                    if (identityResult.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(user, "User");
+                    }
+                    else
+                    {
+                        throw new Exception("User creation failed.");
+                    }
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var jwtToken = _tokenService.CreateJWTToken(user, roles.ToList());
+
+                return new LoginResponseDto
+                {
+                    JwtToken = jwtToken
+                };
+
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception("Signing in user failed");
+            }
+
+        }
+
         public async Task<IdentityResult> RegisterUserAsync(RegisterRequestDto registerRequestDto)
         {
             var user = _mapper.Map<User>(registerRequestDto);
@@ -59,6 +112,7 @@ namespace HealthPadiWebApi.Services.Implementations
 
             return identityResult;
         }
+
     }
-    
+
 }
