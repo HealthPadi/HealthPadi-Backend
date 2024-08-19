@@ -17,12 +17,16 @@ namespace HealthPadiWebApi.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<List<ReportDto>> GetAllReportsAsync()
+        public async Task<List<ReportDto>> GetAllReportsAsync(String location)
         {
+            if (string.IsNullOrWhiteSpace(location) == false)
+            {
+                var reportLocation = await _unitOfWork.Report.GetReportsByLocation(location);
+                return _mapper.Map<List<ReportDto>>(reportLocation);
+            }
             var reports = await _unitOfWork.Report.GetAll();
             return _mapper.Map<List<ReportDto>>(reports);
         }
-
         public async Task<ReportDto> GetReportByIdAsync(Guid id)
         {
             var report = await _unitOfWork.Report.GetByIdAsync(id);
@@ -35,18 +39,6 @@ namespace HealthPadiWebApi.Services.Implementations
             await _unitOfWork.Report.AddAsync(report);
             await _unitOfWork.CompleteAsync();
             return _mapper.Map<ReportDto>(report);
-        }
-
-        public async Task<ReportDto> UpdateReportAsync(Guid id, UpdateReportDto updateReportDto)
-        {
-            var existingReport = _mapper.Map<Report>(updateReportDto);
-            await _unitOfWork.Report.UpdateReport(id, existingReport);
-            if (existingReport == null)
-            {
-                return null;
-            }
-            await _unitOfWork.CompleteAsync();
-            return _mapper.Map<ReportDto>(existingReport);
         }
 
         public async Task<ReportDto> DeleteReportAsync(Guid id)

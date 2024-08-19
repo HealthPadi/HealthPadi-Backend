@@ -12,15 +12,10 @@ namespace HealthPadiWebApi.Repositories.Implementations
         {
             _dbSet = dbContext.Set<Report>();
         }
-        public async Task<Report> UpdateReport(Guid id, Report report)
+
+        public async Task<IEnumerable<Report>> GetReportsByLocation(string location)
         {
-            var existingReport = await _dbSet.FirstOrDefaultAsync(x => x.ReportId == id);
-            if (existingReport == null)
-            {
-                return null;
-            }
-            existingReport.Content = report.Content;
-            return existingReport;
+            return await _dbSet.Where(x => x.Location.ToLower() == location.ToLower()).ToListAsync();
         }
     }
 }
