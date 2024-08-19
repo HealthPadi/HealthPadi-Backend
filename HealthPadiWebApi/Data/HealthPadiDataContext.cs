@@ -14,7 +14,6 @@ namespace HealthPadiWebApi.Data
     public DbSet<Report> Reports { get; set; }
     public DbSet<HealthUpdate> HealthUpdates { get; set; }
     public DbSet<Feed> Feeds { get; set; }
-    public DbSet<FeedMedia> FeedMedias { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,13 +26,6 @@ namespace HealthPadiWebApi.Data
             .HasForeignKey(u => u.UserId)
             //Prevents deletion of User when Report is deleted 
             .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<FeedMedia>()
-            .HasOne(fm => fm.Feed)
-            .WithMany(f => f.FeedMedias)
-            .HasForeignKey(fm => fm.FeedId)
-            //Deletes FeedMedia when Feed is deleted
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 }
