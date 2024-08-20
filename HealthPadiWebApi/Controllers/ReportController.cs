@@ -28,7 +28,7 @@ namespace HealthPadiWebApi.Controllers
             }
             return Ok(report);
         }
-        [HttpGet]
+       /* [HttpGet]
         public async Task<IActionResult> Get1([FromQuery] string location)
         {
             // Check if location is provided
@@ -58,7 +58,7 @@ namespace HealthPadiWebApi.Controllers
             // Return the AI's response to the user
             return Ok(aiResponse);
         }
-
+*/
 
 
         [HttpPost]

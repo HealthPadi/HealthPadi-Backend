@@ -1,4 +1,6 @@
 ﻿using HealthPadiWebApi.Data;
+using HealthPadiWebApi.Models;
+using HealthPadiWebApi.Repositories.Implementations;
 using HealthPadiWebApi.Repositories.Interfaces;
 
 namespace HealthPadiWebApi.Repositories.Implementations
@@ -11,8 +13,11 @@ namespace HealthPadiWebApi.Repositories.Implementations
         {
             _dbContext = dbContext;
             Report = new ReportRepository(dbContext);
+            Feed = new GenericRepository<Feed>(_dbContext);
         }
         public IReportRepository Report { get; private set; }
+
+        public IGenericRepository<Feed> Feed { get; private set; }
 
         public async Task CompleteAsync()
         {
@@ -24,3 +29,5 @@ namespace HealthPadiWebApi.Repositories.Implementations
         }
     }
 }
+
+
