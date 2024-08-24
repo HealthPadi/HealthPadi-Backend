@@ -17,6 +17,13 @@ namespace HealthPadiWebApi.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task<FeedDto> AddFeedAsync(AddFeedDto addFeedDto)
+        {
+            var feed = _mapper.Map<Feed>(addFeedDto);
+            await _unitOfWork.Feed.AddAsync(feed);
+            await _unitOfWork.CompleteAsync();
+            return _mapper.Map<FeedDto>(feed);
+        }
         public async Task<List<FeedDto>> GetAllFeedsAsync()
         {
             var feeds = await _unitOfWork.Feed.GetAll();
