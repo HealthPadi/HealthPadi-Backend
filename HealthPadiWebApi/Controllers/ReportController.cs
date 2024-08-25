@@ -28,7 +28,7 @@ namespace HealthPadiWebApi.Controllers
             }
             return Ok(report);
         }
-        [HttpGet]
+        /*[HttpGet]
         public async Task<IActionResult> Get1([FromQuery] string location)
         {
             // Check if location is provided
@@ -53,11 +53,11 @@ namespace HealthPadiWebApi.Controllers
             var combinedString = $"Location: {location}\n{combinedContent}";
 
             // Send the combined string to the AI for summarization (Assuming AI endpoint integration here)
-            var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
+            //var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
 
             // Return the AI's response to the user
-            return Ok(aiResponse);
-        }
+           // return Ok(aiResponse);
+        }*/
 
 
 

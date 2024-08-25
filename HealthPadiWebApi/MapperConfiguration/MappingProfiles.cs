@@ -11,6 +11,7 @@ namespace HealthPadiWebApi.MapperConfiguration
             CreateMap<Report, ReportDto>().ReverseMap();
             CreateMap<UpdateReportDto, Report>().ReverseMap();
             CreateMap<Report, AddReportDto>().ReverseMap();
+            CreateMap<TaskExecutionLogDto, TaskExecutionLog>().ReverseMap();
             CreateMap<RegisterRequestDto, User>()
            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email ));
         }

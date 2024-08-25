@@ -14,6 +14,7 @@ namespace HealthPadiWebApi.Data
     public DbSet<Report> Reports { get; set; }
     public DbSet<HealthUpdate> HealthUpdates { get; set; }
     public DbSet<Feed> Feeds { get; set; }
+    public DbSet<TaskExecutionLog> TaskExecutionLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
