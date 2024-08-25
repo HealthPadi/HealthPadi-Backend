@@ -28,6 +28,7 @@ namespace HealthPadiWebApi.Extensions
             services.AddScoped<IAIService, AIService>();
             services.AddScoped<ITaskExecutionLoggerService, TaskExecutionLoggerService>();
             services.AddHostedService<WeeklyTaskService>();
+            services.AddScoped<IFeedService, FeedService>();
 
             // Adding Authentication and Authorozation to Swagger
             services.AddSwaggerGen(options =>
