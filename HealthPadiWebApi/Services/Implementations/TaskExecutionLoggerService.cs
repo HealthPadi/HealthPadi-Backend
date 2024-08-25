@@ -12,7 +12,7 @@ namespace HealthPadiWebApi.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        TaskExecutionLoggerService(IUnitOfWork unitOfWork, IMapper mapper)
+        public TaskExecutionLoggerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;

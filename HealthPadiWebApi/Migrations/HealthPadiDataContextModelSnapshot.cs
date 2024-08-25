@@ -52,6 +52,21 @@ namespace HealthPadiWebApi.Migrations
                     b.ToTable("HealthUpdates");
                 });
 
+            modelBuilder.Entity("HealthPadiWebApi.Models.HealthyLivingTopic", b =>
+                {
+                    b.Property<Guid>("HealthyLivingTopicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HealthyLivingTopicId");
+
+                    b.ToTable("HealthyLivingTopics");
+                });
+
             modelBuilder.Entity("HealthPadiWebApi.Models.Report", b =>
                 {
                     b.Property<Guid>("ReportId")

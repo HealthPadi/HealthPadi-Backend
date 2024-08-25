@@ -17,13 +17,13 @@ namespace HealthPadiWebApi.Controllers
             _aiService = aiService;
         }
 
-        [HttpPost]
+       /* [HttpPost]
         [Route("health-feeds")]
         public async Task<IActionResult> GenerateHealthFeeds()
         {
             var response =  await _aiService.GenerateHealthFeeds();
             return Ok(response);
-        }
+        }*/
 
         [HttpPost]
         [Route("ai-chat-bot")]

@@ -10,6 +10,7 @@ namespace HealthPadiWebApi.MapperConfiguration
         {
             CreateMap<Report, ReportDto>().ReverseMap();
             CreateMap<Feed, FeedDto>().ReverseMap();
+            CreateMap<AddFeedDto, Feed>().ReverseMap();
             CreateMap<UpdateReportDto, Report>().ReverseMap();
             CreateMap<Report, AddReportDto>().ReverseMap();
             CreateMap<TaskExecutionLogDto, TaskExecutionLog>().ReverseMap();

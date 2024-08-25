@@ -1,12 +1,9 @@
 ﻿using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 using Azure.AI.OpenAI;
-using System.Collections.Generic;
 using Azure;
 using OpenAI.Chat;
-using OpenAI.Assistants;
 using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 
 
@@ -19,40 +16,40 @@ namespace HealthPadiWebApi.Services.Implementations
         private readonly string _apiKey;
         private readonly AzureOpenAIClient _azureClient;
         private readonly ChatClient _chatClient;
+        private readonly IHealthyLivingTopicsService _healthyLivingTopicsService;
 
-        public AIService(IConfiguration configuration)
+        public AIService(IConfiguration configuration, IHealthyLivingTopicsService healthyLivingTopicsService)
         {
             _configuration = configuration;
             _endpoint = _configuration["AzureConfig:OpenAI:OpenAIUrl"];
             _apiKey = _configuration["AzureConfig:OpenAI:OpenAIKey"];
             _azureClient = new AzureOpenAIClient(new Uri(_endpoint), new AzureKeyCredential(_apiKey));
             _chatClient = _azureClient.GetChatClient(_configuration["AzureConfig:OpenAI:ChatEngine"]);
+            _healthyLivingTopicsService = healthyLivingTopicsService;
         }
 
         public async Task<string> GenerateHealthFeeds()
         {
             try
             {
-                var topic = HealthyLivingTopics.GetRandomTopic();
+                var topic = await _healthyLivingTopicsService.GetOneTopic() ?? throw new InvalidOperationException("No more topics available");
 
-                if (topic == "No more topics available")
-                {
-                    throw new InvalidOperationException("No more topics available");
-                }
+                Console.WriteLine($"Topic in AISERVICE>>>>>><<<<<: {topic}"); 
+               
 
                 var systemMessage = new Models.ChatMessage
                 {
                     Role = "system",
-                    Content = "You are a helpful AI health assistant. Your task is to generate an article on the given topic" +
+                    Content = "You are a helpful AI health assistant. You generate articles on any given topic" +
                   " Each generated content should be between 100 and 300 words." +
                   " Do not prescribe drugs in any of your articles." +
-                  " Let the first line of your article be the topic in capital letters."
+                  " Let the first line be the topic in capital letters."
                 };
 
                 var userMessage = new Models.ChatMessage()
                 {
                     Role = "user",
-                    Content = $"Please, generate an article on ${topic}"
+                    Content = $"Write an article about the health topic: {topic}. Start with the topic in capital letters."
                 };
 
                 var promptConstruct = new List<Models.ChatMessage> { systemMessage, userMessage };
@@ -71,9 +68,9 @@ namespace HealthPadiWebApi.Services.Implementations
             }
             catch (Exception e)
             {
-                   throw new InvalidOperationException("Error generating health feeds", e);
+                throw new InvalidOperationException("Error generating health feeds", e);
             }
-           
+
         }
 
         public string GenerateReportSummary(string prompt)
