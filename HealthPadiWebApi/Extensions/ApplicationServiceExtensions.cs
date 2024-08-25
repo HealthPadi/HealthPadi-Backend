@@ -25,6 +25,7 @@ namespace HealthPadiWebApi.Extensions
             //Registering Services
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IFeedService, FeedService>();
 
             // Adding Authentication and Authorozation to Swagger
             services.AddSwaggerGen(options =>
