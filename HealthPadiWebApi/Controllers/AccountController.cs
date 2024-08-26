@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.Models;
+using HealthPadiWebApi.Services.Implementations;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,6 +34,10 @@ namespace HealthPadiWebApi.Controllers
             if (result.Succeeded)
             {
                 return Ok("User registered successfully, Please login");
+            }
+            if (result.Errors.Any(e => e.Description == ErrorMessages.EmailAlreadyRegistered))
+            {
+                return BadRequest(ErrorMessages.EmailAlreadyRegistered);
             }
 
             return BadRequest("Something went wrong");
