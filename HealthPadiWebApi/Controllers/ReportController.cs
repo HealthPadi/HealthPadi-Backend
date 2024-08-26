@@ -53,7 +53,7 @@ namespace HealthPadiWebApi.Controllers
             var combinedString = $"Location: {location}\n{combinedContent}";
 
             // Send the combined string to the AI for summarization (Assuming AI endpoint integration here)
-            var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
+            //var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
 
             // Return the AI's response to the user
             return Ok(aiResponse);
