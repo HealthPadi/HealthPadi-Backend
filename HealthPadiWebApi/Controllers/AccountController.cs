@@ -30,7 +30,11 @@ namespace HealthPadiWebApi.Controllers
             _httpClient = httpClient;
         }
 
-        //Post: /api/account/register
+        /**
+         * Register: This method is used to register a new user
+         * @param registerRequestDto: The request body containing the user details
+         * Returns IActionResult: Returns a success message if registration is successful, else returns an error message
+         */
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
@@ -60,6 +64,12 @@ namespace HealthPadiWebApi.Controllers
             return BadRequest("Username or Password Incorrect");
         }
 
+        /**
+         * GoogleLogin: This method is used to login a user using Google OAuth2.0
+         * 
+         * @param authCode: The authorization code received from Google to be exchanged for an accessToken
+         * @return IActionResult: Returns the login response if successful, else returns an error message
+         */
         [HttpPost]
         [Route("google-login")]
         public async Task<IActionResult> GoogleLogin([FromQuery] string authCode)
@@ -106,6 +116,12 @@ namespace HealthPadiWebApi.Controllers
             }
         }
 
+        /**
+         * GetGoogleTokenAsync: This method is used to get the Google OAuth2.0 token
+         * 
+         * @param authCode: The authorization code received from Google to be exchanged for an accessToken
+         * @return TokenResponse: Returns the token response from Google
+         */
         private async Task<TokenResponse> GetGoogleTokenAsync(string authCode)
         {
             var clientId = _configuration["Authentication:Google:ClientId"];
@@ -126,6 +142,12 @@ namespace HealthPadiWebApi.Controllers
             return await tokenRequest.ExecuteAsync(_httpClient, tokenServerUrl, CancellationToken.None, systemClock);
         }
 
+        /**
+         * ValidateGoogleTokenAsync: This method is used to validate the Google OAuth2.0 token
+         * 
+         * @param idToken: The idToken received from Google
+         * @return Payload: Returns the payload of the token containing user details
+         */
         private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleTokenAsync(string idToken)
         {
             return await GoogleJsonWebSignature.ValidateAsync(idToken);
