@@ -8,7 +8,7 @@ namespace HealthPadiWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   /* [Authorize(AuthenticationSchemes = "Bearer")]*/
+    /* [Authorize(AuthenticationSchemes = "Bearer")]*/
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
@@ -19,10 +19,47 @@ namespace HealthPadiWebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string? location)
         {
-            return Ok(await _reportService.GetAllReportsAsync());
+            var report = await _reportService.GetAllReportsAsync(location);
+            if (report == null)
+            {
+                return NotFound();
+            }
+            return Ok(report);
         }
+       /* [HttpGet]
+        public async Task<IActionResult> Get1([FromQuery] string location)
+        {
+            // Check if location is provided
+            if (string.IsNullOrEmpty(location))
+            {
+                return BadRequest("Location is required to retrieve reports.");
+            }
+
+            // Retrieve all reports for the specified location
+            var reports = await _reportService.GetAllReportsAsync(location);
+
+            // If no reports are found for the location, return a NotFound response
+            if (reports == null || !reports.Any())
+            {
+                return NotFound("No reports found for the specified location.");
+            }
+
+            // Combine all report contents into a single string
+            var combinedContent = string.Join(" ", reports.Select(r => r.Content));
+
+            // Create a single string with location and combined content
+            var combinedString = $"Location: {location}\n{combinedContent}";
+
+            // Send the combined string to the AI for summarization (Assuming AI endpoint integration here)
+            //var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
+
+            // Return the AI's response to the user
+            return Ok(aiResponse);
+        }
+*/
+
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddReportDto addReportDto)
@@ -39,14 +76,6 @@ namespace HealthPadiWebApi.Controllers
             {
                 return NotFound();
             }
-            return Ok(report);
-        }
-
-        [HttpPatch]
-        [Route("{id:Guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReportDto updateReportDto)
-        {
-            var report = await _reportService.UpdateReportAsync(id, updateReportDto);
             return Ok(report);
         }
 

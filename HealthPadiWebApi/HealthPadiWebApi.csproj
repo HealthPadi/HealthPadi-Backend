@@ -9,8 +9,13 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="13.0.1" />
+        <PackageReference Include="Azure.AI.OpenAI" Version="2.0.0-beta.2" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+<<<<<<< HEAD
         <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
+=======
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
+>>>>>>> dev
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />

@@ -11,6 +11,9 @@ namespace HealthPadiBackend.Validators
                .NotEmpty()
                .WithMessage("Content must not be empty")
                .MaximumLength(1000);
+
+            RuleFor(x => x.Location)
+               .NotEmpty();
         }
     }
 }

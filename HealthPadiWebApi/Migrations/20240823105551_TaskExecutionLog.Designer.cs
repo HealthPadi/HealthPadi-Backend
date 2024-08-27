@@ -4,6 +4,7 @@ using HealthPadiWebApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthPadiWebApi.Migrations
 {
     [DbContext(typeof(HealthPadiDataContext))]
-    partial class HealthPadiDataContextModelSnapshot : ModelSnapshot
+    [Migration("20240823105551_TaskExecutionLog")]
+    partial class TaskExecutionLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,21 +53,6 @@ namespace HealthPadiWebApi.Migrations
                     b.HasKey("HealthUpdateId");
 
                     b.ToTable("HealthUpdates");
-                });
-
-            modelBuilder.Entity("HealthPadiWebApi.Models.HealthyLivingTopic", b =>
-                {
-                    b.Property<Guid>("HealthyLivingTopicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HealthyLivingTopicId");
-
-                    b.ToTable("HealthyLivingTopics");
                 });
 
             modelBuilder.Entity("HealthPadiWebApi.Models.Report", b =>

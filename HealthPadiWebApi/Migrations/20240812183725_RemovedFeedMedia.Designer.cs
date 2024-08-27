@@ -4,6 +4,7 @@ using HealthPadiWebApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthPadiWebApi.Migrations
 {
     [DbContext(typeof(HealthPadiDataContext))]
-    partial class HealthPadiDataContextModelSnapshot : ModelSnapshot
+    [Migration("20240812183725_RemovedFeedMedia")]
+    partial class RemovedFeedMedia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,21 +55,6 @@ namespace HealthPadiWebApi.Migrations
                     b.ToTable("HealthUpdates");
                 });
 
-            modelBuilder.Entity("HealthPadiWebApi.Models.HealthyLivingTopic", b =>
-                {
-                    b.Property<Guid>("HealthyLivingTopicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HealthyLivingTopicId");
-
-                    b.ToTable("HealthyLivingTopics");
-                });
-
             modelBuilder.Entity("HealthPadiWebApi.Models.Report", b =>
                 {
                     b.Property<Guid>("ReportId")
@@ -89,20 +77,6 @@ namespace HealthPadiWebApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reports");
-                });
-
-            modelBuilder.Entity("HealthPadiWebApi.Models.TaskExecutionLog", b =>
-                {
-                    b.Property<Guid>("TaskExecutionLogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastExecutionTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("TaskExecutionLogId");
-
-                    b.ToTable("TaskExecutionLogs");
                 });
 
             modelBuilder.Entity("HealthPadiWebApi.Models.User", b =>

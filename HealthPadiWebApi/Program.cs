@@ -1,10 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using HealthPadiWebApi;
 using HealthPadiWebApi.Extensions;
 using HealthPadiWebApi.Data;
-using HealthPadiWebApi.Middlewares;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
+
 
 namespace HealthPadiWebApi;
 
