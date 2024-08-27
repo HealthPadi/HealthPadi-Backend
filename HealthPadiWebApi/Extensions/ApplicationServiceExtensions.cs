@@ -14,6 +14,7 @@ namespace HealthPadiWebApi.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            services.AddHttpClient();
             // Registering Automapper
             services.AddSingleton<MappingProfiles>();
             services.AddAutoMapper(typeof(MappingProfiles));
