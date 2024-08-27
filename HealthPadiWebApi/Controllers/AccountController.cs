@@ -1,13 +1,15 @@
 ﻿using AutoMapper;
+using Google.Apis.Auth;
+using Google.Apis.Auth.OAuth2.Requests;
+using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Util;
 using HealthPadiWebApi.DTOs;
-using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.Extensions.Internal;
+using System.Net.Http;
+
 
 namespace HealthPadiWebApi.Controllers
 {
@@ -16,10 +18,16 @@ namespace HealthPadiWebApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly ILogger<AccountController> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IConfiguration configuration, HttpClient httpClient)
         {
             _accountService = accountService;
+            _logger = logger;
+            _configuration = configuration;
+            _httpClient = httpClient;
         }
 
         //Post: /api/account/register
@@ -52,41 +60,76 @@ namespace HealthPadiWebApi.Controllers
             return BadRequest("Username or Password Incorrect");
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("google-login")]
-        public IActionResult GoogleLogin()
+        public async Task<IActionResult> GoogleLogin([FromQuery] string authCode)
         {
-            var properties = new AuthenticationProperties { RedirectUri = "api/account/google-response" };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+            try
+            {
+                var tokenResponse = await GetGoogleTokenAsync(authCode);
+                if (tokenResponse == null)
+                {
+                    _logger.LogError("Couldn't retrieve Token request");
+                    return BadRequest("Couldn't get IdToken from Google");
+                }
+
+                var payload = await ValidateGoogleTokenAsync(tokenResponse.IdToken);
+                if (payload == null)
+                {
+                    _logger.LogError("Couldn't retrieve user details from Google");
+                    return BadRequest("Couldn't retrieve user details from Google");
+                }
+
+                if (string.IsNullOrEmpty(payload.Email) || string.IsNullOrEmpty(payload.GivenName) || string.IsNullOrEmpty(payload.FamilyName))
+                {
+                    return BadRequest("Incomplete user information received from Google.");
+                }
+
+                var loginResponse = await _accountService.LoginUserWithGoogleAsync(payload.Email, payload.GivenName, payload.FamilyName);
+
+                if (loginResponse != null)
+                {
+                    return Ok(loginResponse);
+                }
+
+                return BadRequest("Login Failed");
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while getting user details from Google");
+                return StatusCode(503, "Service Unavailable");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Getting user details from Google");
+                return BadRequest("Error Getting user details from Google");
+            }
         }
 
-        [HttpGet]
-        [Route("google-response")]
-        public async Task<IActionResult> GoogleResponse()
+        private async Task<TokenResponse> GetGoogleTokenAsync(string authCode)
         {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!result.Succeeded || result.Principal == null)
+            var clientId = _configuration["Authentication:Google:ClientId"];
+            var clientKey = _configuration["Authentication:Google:ClientKey"];
+            var redirectUri = _configuration["Authentication:Google:RedirectUri"];
+            var tokenRequest = new AuthorizationCodeTokenRequest
             {
-                return BadRequest("Authentication failed.");
-            }
-            var claimsIdentity = result.Principal.Identity as ClaimsIdentity;
-            var email = claimsIdentity?.FindFirst(ClaimTypes.Email)?.Value;
-            var firstName = claimsIdentity?.FindFirst(ClaimTypes.GivenName)?.Value;
-            var lastName = claimsIdentity?.FindFirst(ClaimTypes.Surname)?.Value;
+                ClientId = clientId,
+                ClientSecret = clientKey,
+                Code = authCode,
+                RedirectUri = redirectUri,
+                GrantType = "authorization_code"
+            };
 
-            Console.WriteLine($"{email} >>>> {firstName} >>> {lastName}");
+            string tokenServerUrl = "https://oauth2.googleapis.com/token";
+            var systemClock = Google.Apis.Util.SystemClock.Default;
 
-            if (email == null || firstName == null || lastName == null)
-                return BadRequest("Incomplete information");
-
-            var loginResponse = await _accountService.LoginUserWithGoogleAsync(email, firstName, lastName);
-
-            if (loginResponse != null)
-            {
-                return Ok(loginResponse);
-            }
-
-            return BadRequest("Login Failed");
+            return await tokenRequest.ExecuteAsync(_httpClient, tokenServerUrl, CancellationToken.None, systemClock);
         }
+
+        private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleTokenAsync(string idToken)
+        {
+            return await GoogleJsonWebSignature.ValidateAsync(idToken);
+        }
+
     }
 }
