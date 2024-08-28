@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HealthPadiWebApi.DTOs
+namespace HealthPadiWebApi.DTOs.Request
 {
     public class LoginRequestDto
     {

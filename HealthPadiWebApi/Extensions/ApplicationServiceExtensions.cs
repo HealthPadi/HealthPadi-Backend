@@ -14,6 +14,7 @@ namespace HealthPadiWebApi.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            services.AddHttpClient();
             // Registering Automapper
             services.AddSingleton<MappingProfiles>();
             services.AddAutoMapper(typeof(MappingProfiles));
@@ -25,6 +26,10 @@ namespace HealthPadiWebApi.Extensions
             //Registering Services
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IHealthyLivingTopicsService, HealthyLivingTopicsService>();
+            services.AddScoped<ITaskExecutionLoggerService, TaskExecutionLoggerService>();
+            services.AddScoped<IAIService, AIService>();
+            services.AddHostedService<WeeklyTaskService>();
             services.AddScoped<IFeedService, FeedService>();
 
             // Adding Authentication and Authorozation to Swagger

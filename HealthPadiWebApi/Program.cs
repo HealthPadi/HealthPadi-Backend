@@ -1,10 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using HealthPadiWebApi;
 using HealthPadiWebApi.Extensions;
 using HealthPadiWebApi.Data;
-using HealthPadiWebApi.Middlewares;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
+
 
 namespace HealthPadiWebApi;
 
@@ -14,6 +11,18 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000", "https://dev--healthpadi.netlify.app/")
+                    .AllowAnyHeader()
+                    .WithMethods("GET", "POST", "PUT", "DELETE")
+                    .SetIsOriginAllowed((host) => true)
+                    .AllowCredentials();
+                });
+        });
         // Registers controllers and set up authorization policies.
         builder.Services.AddControllers();
         
@@ -69,6 +78,7 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseAuthentication();
+        app.UseCors();
         app.UseAuthorization();
         app.MapControllers();
         /*app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
