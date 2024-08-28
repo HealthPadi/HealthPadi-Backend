@@ -1,4 +1,4 @@
-﻿namespace HealthPadiWebApi.DTOs.Response
+﻿namespace HealthPadiWebApi.DTOs.Shared
 {
     public class ErrorMessages
     {

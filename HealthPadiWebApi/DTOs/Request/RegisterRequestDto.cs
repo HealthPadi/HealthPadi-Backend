@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
 
-namespace HealthPadiWebApi.DTOs
+namespace HealthPadiWebApi.DTOs.Request
 {
     public class RegisterRequestDto
     {
@@ -15,7 +16,7 @@ namespace HealthPadiWebApi.DTOs
 
         [Required]
         [DataType(DataType.Password)]
+        [RegularExpression("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\\d]).{8,}", ErrorMessage = "Password must have at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 non-alphanumeric character, and be at least 8 characters long.")]
         public string Password { get; set; }
-        /*public string[] Roles { get; set; }*/
     }
 }
