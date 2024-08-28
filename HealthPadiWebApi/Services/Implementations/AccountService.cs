@@ -89,7 +89,8 @@ namespace HealthPadiWebApi.Services.Implementations
 
                 return new LoginResponseDto
                 {
-                    JwtToken = jwtToken
+                    JwtToken = jwtToken,
+                    User = _mapper.Map<UserDto>(user)
                 };
 
             } catch (Exception ex)
