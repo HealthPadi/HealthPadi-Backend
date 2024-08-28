@@ -1,4 +1,9 @@
 ﻿using AutoMapper;
+using Google.Apis.Auth;
+using Google.Apis.Auth.OAuth2.Requests;
+using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Util;
+using HealthPadiWebApi.DTOs;
 using HealthPadiWebApi.DTOs.Request;
 using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.DTOs.Shared;
@@ -8,7 +13,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.Extensions.Internal;
+using System.Net.Http;
+
 
 namespace HealthPadiWebApi.Controllers
 {
@@ -19,15 +26,25 @@ namespace HealthPadiWebApi.Controllers
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
+        private readonly ILogger<AccountController> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
-        public AccountController(IAccountService accountService, IMapper mapper, UserManager<User> userManager)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IMapper mapper, IConfiguration configuration, HttpClient httpClient, UserManager<User> userManager)
         {
             _accountService = accountService;
             _mapper = mapper;
             _userManager = userManager;
+            _logger = logger;
+            _configuration = configuration;
+            _httpClient = httpClient;
         }
 
-        //Post: /api/account/register
+        /**
+         * Register: This method is used to register a new user
+         * @param registerRequestDto: The request body containing the user details
+         * Returns IActionResult: Returns a success message if registration is successful, else returns an error message
+         */
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
@@ -62,41 +79,94 @@ namespace HealthPadiWebApi.Controllers
             return Unauthorized(ApiResponse.AuthenticationException("Invalid email or password"));
         }
 
-        [HttpGet]
+        /**
+         * GoogleLogin: This method is used to login a user using Google OAuth2.0
+         * 
+         * @param authCode: The authorization code received from Google to be exchanged for an accessToken
+         * @return IActionResult: Returns the login response if successful, else returns an error message
+         */
+        [HttpPost]
         [Route("google-login")]
-        public IActionResult GoogleLogin()
+        public async Task<IActionResult> GoogleLogin([FromQuery] string authCode)
         {
-            var properties = new AuthenticationProperties { RedirectUri = "api/account/google-response" };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+            try
+            {
+                var tokenResponse = await GetGoogleTokenAsync(authCode);
+                if (tokenResponse == null)
+                {
+                    _logger.LogError("Couldn't retrieve Token request");
+                    return BadRequest("Couldn't get IdToken from Google");
+                }
+
+                var payload = await ValidateGoogleTokenAsync(tokenResponse.IdToken);
+                if (payload == null)
+                {
+                    _logger.LogError("Couldn't retrieve user details from Google");
+                    return BadRequest("Couldn't retrieve user details from Google");
+                }
+
+                if (string.IsNullOrEmpty(payload.Email) || string.IsNullOrEmpty(payload.GivenName) || string.IsNullOrEmpty(payload.FamilyName))
+                {
+                    return BadRequest("Incomplete user information received from Google.");
+                }
+
+                var loginResponse = await _accountService.LoginUserWithGoogleAsync(payload.Email, payload.GivenName, payload.FamilyName);
+
+                if (loginResponse != null)
+                {
+                    return Ok(ApiResponse.SuccessMessageWithData(loginResponse));
+                }
+
+                return BadRequest("Login Failed");
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while getting user details from Google");
+                return StatusCode(503, "Service Unavailable");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Getting user details from Google");
+                return BadRequest("Error Getting user details from Google");
+            }
         }
 
-        [HttpGet]
-        [Route("google-response")]
-        public async Task<IActionResult> GoogleResponse()
+        /**
+         * GetGoogleTokenAsync: This method is used to get the Google OAuth2.0 token
+         * 
+         * @param authCode: The authorization code received from Google to be exchanged for an accessToken
+         * @return TokenResponse: Returns the token response from Google
+         */
+        private async Task<TokenResponse> GetGoogleTokenAsync(string authCode)
         {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!result.Succeeded || result.Principal == null)
+            var clientId = _configuration["Authentication:Google:ClientId"];
+            var clientKey = _configuration["Authentication:Google:ClientKey"];
+            var redirectUri = _configuration["Authentication:Google:RedirectUri"];
+            var tokenRequest = new AuthorizationCodeTokenRequest
             {
-                return BadRequest("Authentication failed.");
-            }
-            var claimsIdentity = result.Principal.Identity as ClaimsIdentity;
-            var email = claimsIdentity?.FindFirst(ClaimTypes.Email)?.Value;
-            var firstName = claimsIdentity?.FindFirst(ClaimTypes.GivenName)?.Value;
-            var lastName = claimsIdentity?.FindFirst(ClaimTypes.Surname)?.Value;
+                ClientId = clientId,
+                ClientSecret = clientKey,
+                Code = authCode,
+                RedirectUri = redirectUri,
+                GrantType = "authorization_code"
+            };
 
-            Console.WriteLine($"{email} >>>> {firstName} >>> {lastName}");
+            string tokenServerUrl = "https://oauth2.googleapis.com/token";
+            var systemClock = Google.Apis.Util.SystemClock.Default;
 
-            if (email == null || firstName == null || lastName == null)
-                return BadRequest("Incomplete information");
-
-            var loginResponse = await _accountService.LoginUserWithGoogleAsync(email, firstName, lastName);
-
-            if (loginResponse != null)
-            {
-                return Ok(loginResponse);
-            }
-
-            return BadRequest("Login Failed");
+            return await tokenRequest.ExecuteAsync(_httpClient, tokenServerUrl, CancellationToken.None, systemClock);
         }
+
+        /**
+         * ValidateGoogleTokenAsync: This method is used to validate the Google OAuth2.0 token
+         * 
+         * @param idToken: The idToken received from Google
+         * @return Payload: Returns the payload of the token containing user details
+         */
+        private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleTokenAsync(string idToken)
+        {
+            return await GoogleJsonWebSignature.ValidateAsync(idToken);
+        }
+
     }
 }
