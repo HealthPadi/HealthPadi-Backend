@@ -1,4 +1,4 @@
-﻿namespace HealthPadiWebApi.DTOs
+﻿namespace HealthPadiWebApi.DTOs.Response
 {
     public class TaskExecutionLogDto
     {

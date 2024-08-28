@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
 
 namespace HealthPadiBackend.Validators
 {

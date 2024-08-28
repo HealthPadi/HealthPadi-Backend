@@ -6,6 +6,8 @@ using Google.Apis.Util;
 using HealthPadiWebApi.DTOs;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Internal;
 using System.Net.Http;
@@ -18,13 +20,18 @@ namespace HealthPadiWebApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
         public AccountController(IAccountService accountService, ILogger<AccountController> logger, IConfiguration configuration, HttpClient httpClient)
+        public AccountController(IAccountService accountService, IMapper mapper, UserManager<User> userManager)
         {
             _accountService = accountService;
+            _mapper = mapper;
+            _userManager = userManager;
             _logger = logger;
             _configuration = configuration;
             _httpClient = httpClient;
@@ -43,11 +50,17 @@ namespace HealthPadiWebApi.Controllers
 
             if (result.Succeeded)
             {
-                return Ok("User registered successfully, Please login");
+                var user = await _userManager.FindByEmailAsync(registerRequestDto.Email);
+                return Ok(ApiResponse.SuccessMessageWithData(_mapper.Map<RegisterResponseDto>(user)));
+            }
+            if (result.Errors.Any(e => e.Description == ErrorMessages.EmailAlreadyRegistered))
+            {
+                return BadRequest(ErrorMessages.EmailAlreadyRegistered);
             }
 
-            return BadRequest("Something went wrong");
+            return BadRequest(ApiResponse.UnknownException("Something went wrong, try again"));
         }
+
 
         //Post: /api/account/login
         [HttpPost]
@@ -58,10 +71,9 @@ namespace HealthPadiWebApi.Controllers
 
             if (response != null)
             {
-                return Ok(response);
+                return Ok(ApiResponse.SuccessMessageWithData(response));
             }
-
-            return BadRequest("Username or Password Incorrect");
+            return Unauthorized(ApiResponse.AuthenticationException("Invalid email or password"));
         }
 
         /**
