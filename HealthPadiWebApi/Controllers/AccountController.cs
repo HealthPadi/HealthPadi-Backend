@@ -140,12 +140,12 @@ namespace HealthPadiWebApi.Controllers
         private async Task<TokenResponse> GetGoogleTokenAsync(string authCode)
         {
             var clientId = _configuration["Authentication:Google:ClientId"];
-            var clientKey = _configuration["Authentication:Google:ClientKey"];
+            var clientSecret = _configuration["Authentication:Google:ClientSecret"];
             var redirectUri = _configuration["Authentication:Google:RedirectUri"];
             var tokenRequest = new AuthorizationCodeTokenRequest
             {
                 ClientId = clientId,
-                ClientSecret = clientKey,
+                ClientSecret = clientSecret,
                 Code = authCode,
                 RedirectUri = redirectUri,
                 GrantType = "authorization_code"
