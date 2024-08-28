@@ -4,6 +4,10 @@ using Google.Apis.Auth.OAuth2.Requests;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Util;
 using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
+using HealthPadiWebApi.DTOs.Shared;
+using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -26,8 +30,7 @@ namespace HealthPadiWebApi.Controllers
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IConfiguration configuration, HttpClient httpClient)
-        public AccountController(IAccountService accountService, IMapper mapper, UserManager<User> userManager)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IMapper mapper, IConfiguration configuration, HttpClient httpClient, UserManager<User> userManager)
         {
             _accountService = accountService;
             _mapper = mapper;
@@ -111,7 +114,7 @@ namespace HealthPadiWebApi.Controllers
 
                 if (loginResponse != null)
                 {
-                    return Ok(loginResponse);
+                    return Ok(ApiResponse.SuccessMessageWithData(loginResponse));
                 }
 
                 return BadRequest("Login Failed");
