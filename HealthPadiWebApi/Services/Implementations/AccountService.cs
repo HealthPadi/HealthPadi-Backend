@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
+using HealthPadiWebApi.DTOs.Shared;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -36,7 +38,8 @@ namespace HealthPadiWebApi.Services.Implementations
 
                         return new LoginResponseDto
                         {
-                            JwtToken = jwtToken
+                            JwtToken = jwtToken,
+                            User = _mapper.Map<UserDto>(user)
                         };
                     }
                 }
@@ -97,17 +100,22 @@ namespace HealthPadiWebApi.Services.Implementations
 
         }
 
+        
         public async Task<IdentityResult> RegisterUserAsync(RegisterRequestDto registerRequestDto)
         {
+            var existingUser = await _userManager.FindByEmailAsync(registerRequestDto.Email);
+            if (existingUser != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = ErrorMessages.EmailAlreadyRegistered });
+            }
+
             var user = _mapper.Map<User>(registerRequestDto);
             var identityResult = await _userManager.CreateAsync(user, registerRequestDto.Password);
 
             if (identityResult.Succeeded)
             {
-                if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
-                {
-                    identityResult = await _userManager.AddToRolesAsync(user, registerRequestDto.Roles);
-                }
+                // Automatically assign the default "User" role
+                identityResult = await _userManager.AddToRoleAsync(user, "User");
             }
 
             return identityResult;

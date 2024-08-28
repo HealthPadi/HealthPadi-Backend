@@ -1,4 +1,7 @@
-﻿using HealthPadiWebApi.DTOs;
+﻿using AutoMapper;
+using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
+using HealthPadiWebApi.DTOs.Shared;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,10 +15,12 @@ namespace HealthPadiWebApi.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
+        private readonly IMapper _mapper;
 
-        public ReportController(IReportService reportService)
+        public ReportController(IReportService reportService, IMapper mapper)
         {
             _reportService = reportService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -24,9 +29,10 @@ namespace HealthPadiWebApi.Controllers
             var report = await _reportService.GetAllReportsAsync(location);
             if (report == null)
             {
-                return NotFound();
+                return null;
+               
             }
-            return Ok(report);
+            return Ok(ApiResponse.SuccessMessageWithData(_mapper.Map<List<ReportDto>>(report)));
         }
        /* [HttpGet]
         public async Task<IActionResult> Get1([FromQuery] string location)
@@ -74,9 +80,9 @@ namespace HealthPadiWebApi.Controllers
             var report = await _reportService.GetReportByIdAsync(id);
             if (report == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse.NotFoundException("Report not found"));
             }
-            return Ok(report);
+            return Ok(ApiResponse.SuccessMessageWithData(_mapper.Map<ReportDto>(report)));
         }
 
         [HttpDelete]
@@ -86,9 +92,9 @@ namespace HealthPadiWebApi.Controllers
             var report = await _reportService.DeleteReportAsync(id);
             if (report == null)
             {
-                return NotFound();
+                return NotFound(ApiResponse.NotFoundException("Report not found"));
             }
-            return Ok(report);
+            return Ok(ApiResponse.SuccessMessage("Report deleted!"));
         }
     }
 }

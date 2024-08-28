@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Repositories.Interfaces;
 using HealthPadiWebApi.Services.Interfaces;

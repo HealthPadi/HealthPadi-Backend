@@ -1,4 +1,5 @@
-﻿using HealthPadiWebApi.DTOs;
+﻿using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
 using Microsoft.AspNetCore.Identity;
 
 namespace HealthPadiWebApi.Services.Interfaces

@@ -1,4 +1,5 @@
 ﻿using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 

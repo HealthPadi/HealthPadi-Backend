@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
-using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Request;
+using HealthPadiWebApi.DTOs.Response;
+using HealthPadiWebApi.DTOs.Shared;
 using HealthPadiWebApi.Models;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,14 @@ namespace HealthPadiWebApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IMapper mapper, UserManager<User> userManager)
         {
             _accountService = accountService;
+            _mapper = mapper;
+            _userManager = userManager;
         }
 
         //Post: /api/account/register
@@ -31,11 +36,17 @@ namespace HealthPadiWebApi.Controllers
 
             if (result.Succeeded)
             {
-                return Ok("User registered successfully, Please login");
+                var user = await _userManager.FindByEmailAsync(registerRequestDto.Email);
+                return Ok(ApiResponse.SuccessMessageWithData(_mapper.Map<RegisterResponseDto>(user)));
+            }
+            if (result.Errors.Any(e => e.Description == ErrorMessages.EmailAlreadyRegistered))
+            {
+                return BadRequest(ErrorMessages.EmailAlreadyRegistered);
             }
 
-            return BadRequest("Something went wrong");
+            return BadRequest(ApiResponse.UnknownException("Something went wrong, try again"));
         }
+
 
         //Post: /api/account/login
         [HttpPost]
@@ -46,10 +57,9 @@ namespace HealthPadiWebApi.Controllers
 
             if (response != null)
             {
-                return Ok(response);
+                return Ok(ApiResponse.SuccessMessageWithData(response));
             }
-
-            return BadRequest("Username or Password Incorrect");
+            return Unauthorized(ApiResponse.AuthenticationException("Invalid email or password"));
         }
 
         [HttpGet]

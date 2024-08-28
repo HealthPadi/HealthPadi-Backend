@@ -1,5 +1,5 @@
 ﻿using HealthPadiWebApi.Controllers;
-using HealthPadiWebApi.DTOs;
+using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
