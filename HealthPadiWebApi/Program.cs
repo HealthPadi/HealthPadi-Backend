@@ -16,7 +16,7 @@ public class Program
             options.AddDefaultPolicy(
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000")
+                    builder.WithOrigins("http://localhost:3000", "https://dev--healthpadi.netlify.app/")
                     .AllowAnyHeader()
                     .WithMethods("GET", "POST", "PUT", "DELETE")
                     .SetIsOriginAllowed((host) => true)
