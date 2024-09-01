@@ -17,14 +17,11 @@ namespace HealthPadiWebApi.Controllers
             _aiService = aiService;
         }
 
-       /* [HttpPost]
-        [Route("health-feeds")]
-        public async Task<IActionResult> GenerateHealthFeeds()
-        {
-            var response =  await _aiService.GenerateHealthFeeds();
-            return Ok(response);
-        }*/
-
+        /**
+         * ChatWithBot - Chat with the AI chat bot
+         * @param request - the chat request
+         * @return a response containing the AI's chat response
+         */
         [HttpPost]
         [Route("ai-chat-bot")]
         public async Task ChatWithBot([FromBody] ChatRequest request, CancellationToken cancellationToken)
@@ -52,7 +49,6 @@ namespace HealthPadiWebApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (if logging is set up)
                 Response.StatusCode = StatusCodes.Status500InternalServerError;
                 var errorBytes = Encoding.UTF8.GetBytes("An error occurred while processing the request.");
                 await responseStream.WriteAsync(errorBytes, 0, errorBytes.Length, cancellationToken);
