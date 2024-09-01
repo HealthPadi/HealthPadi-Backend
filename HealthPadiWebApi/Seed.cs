@@ -124,6 +124,27 @@ namespace HealthPadiWebApi
                                 UserId = bob.Id,
                                 Location = "New York",
                                 Content = "Measles cases rising in New York: Urgent need for vaccinations."
+                            },
+                             new Report
+                            {
+                                ReportId = Guid.NewGuid(),
+                                UserId = alice.Id,
+                                Location = "Los Angeles",
+                                Content = "The Ebola crisis has been very terrible over the past few days"
+                            },
+                            new Report
+                            {
+                                ReportId = Guid.NewGuid(),
+                                UserId = bob.Id,
+                                Location = "Los Angeles",
+                                Content = "Dengue fever has been spreading in Chicago."
+                            },
+                            new Report
+                {
+                                ReportId = Guid.NewGuid(),
+                                UserId = alice.Id,
+                                Location = "New York",
+                                Content = "Typhoid outbreak becoming rampant in New York"
                             }
                         };
 
@@ -133,7 +154,7 @@ namespace HealthPadiWebApi
                 }
 
 
-                
+
                 // Seed HealthUpdates
                 if (!_context.HealthUpdates.Any())
                 {
