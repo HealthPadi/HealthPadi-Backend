@@ -27,15 +27,16 @@ namespace HealthPadiWebApi.Services.Implementations
             _chatClient = _azureClient.GetChatClient(_configuration["AzureConfig:OpenAI:ChatEngine"]);
             _healthyLivingTopicsService = healthyLivingTopicsService;
         }
-
+        
+        /**
+         * GenerateHealthFeeds - Generates health feeds on a given topic
+         * @return a string containing the health feeds
+         */
         public async Task<string> GenerateHealthFeeds()
         {
             try
             {
-                var topic = await _healthyLivingTopicsService.GetOneTopic() ?? throw new InvalidOperationException("No more topics available");
-
-                Console.WriteLine($"Topic in AISERVICE>>>>>><<<<<: {topic}"); 
-               
+                var topic = await _healthyLivingTopicsService.GetOneTopic() ?? throw new InvalidOperationException("No more topics available"); 
 
                 var systemMessage = new Models.ChatMessage
                 {
@@ -73,11 +74,56 @@ namespace HealthPadiWebApi.Services.Implementations
 
         }
 
-        public string GenerateReportSummary(string prompt)
+        /**
+         * GenerateReportSummary - Generates a summary of a health report
+         * @param report - the health report to summarize
+         * @return a string containing the summary of the health report
+         */
+        public async Task<string> GenerateReportSummary(string report)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var systemMessage = new Models.ChatMessage
+                {
+                    Role = "system",
+                    Content = "You are a helpful AI health assistant. You provide a summary of whatever health report you are given" +
+                    "Each summarized report should be between 50 and 100 words." 
+                };
+
+                var userMessage = new Models.ChatMessage()
+                {
+                    Role = "user",
+                    Content = $" Summarize the report: {report}.\n The report should be about the 'Location' provided in the first line of the report"
+                };
+
+                var promptConstruct = new List<Models.ChatMessage> { systemMessage, userMessage };
+                var openAiPrompt = promptConstruct.Select(msg => MapToOpenAIChatMessage(msg)).ToList();
+
+                ChatCompletion aiResponse = await _chatClient.CompleteChatAsync(openAiPrompt, new ChatCompletionOptions() { Temperature = 0.7f, MaxTokens = 500 });
+                if (aiResponse == null)
+                {
+                    throw new InvalidOperationException("Error getting response from Bot");
+                }
+
+                var fullText = string.Join(" ", aiResponse.Content.Select(part => part.ToString()));
+
+                fullText += Environment.NewLine + "Based on reports submitted by users.";
+
+                return fullText;
+
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Error summarizing report:", e);
+            }
         }
 
+        /**
+         * ChatWithAI - Initiates a chat with the AI
+         * @param request - the chat request
+         * @param cancellationToken - the cancellation token
+         * @return an async enumerable of strings containing the chat messages
+         */
         public async IAsyncEnumerable<string> ChatWithAI(ChatRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(_endpoint) || string.IsNullOrEmpty(_apiKey))
@@ -112,6 +158,11 @@ namespace HealthPadiWebApi.Services.Implementations
             }
         }
 
+        /**
+         * MapToOpenAIChatMessage - Maps a ChatMessage to an OpenAI ChatMessage
+         * @param msg - the ChatMessage to map
+         * @return an OpenAI ChatMessage
+         */
         private OpenAI.Chat.ChatMessage MapToOpenAIChatMessage(Models.ChatMessage msg)
         {
             return msg.Role switch
