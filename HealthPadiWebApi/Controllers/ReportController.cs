@@ -15,27 +15,24 @@ namespace HealthPadiWebApi.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
+        private readonly IAIService _aiService;
         private readonly IMapper _mapper;
 
-        public ReportController(IReportService reportService, IMapper mapper)
+        public ReportController(IReportService reportService, IAIService aiService, IMapper mapper)
         {
             _reportService = reportService;
+            _aiService = aiService;
             _mapper = mapper;
         }
 
+        /**
+         * 
+         * Get - Retrieves all reports for a specified location and sends the combined content to the AI for summarization
+         * @param location - the location to retrieve reports for
+         * @return a response containing the AI's summary of the combined content
+         */
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? location)
-        {
-            var report = await _reportService.GetAllReportsAsync(location);
-            if (report == null)
-            {
-                return null;
-               
-            }
-            return Ok(ApiResponse.SuccessMessageWithData(_mapper.Map<List<ReportDto>>(report)));
-        }
-       /* [HttpGet]
-        public async Task<IActionResult> Get1([FromQuery] string location)
+        public async Task<IActionResult> Get([FromQuery] string location)
         {
             // Check if location is provided
             if (string.IsNullOrEmpty(location))
@@ -59,14 +56,18 @@ namespace HealthPadiWebApi.Controllers
             var combinedString = $"Location: {location}\n{combinedContent}";
 
             // Send the combined string to the AI for summarization (Assuming AI endpoint integration here)
-            //var aiResponse = await _aiService.SummarizeReportAsync(combinedString);
+            var aiResponse = await _aiService.GenerateReportSummary(combinedString);
 
             // Return the AI's response to the user
-            return Ok(aiResponse);
+            return Ok(ApiResponse.SuccessMessageWithData(aiResponse));
         }
-*/
 
 
+        /**
+         * Add - Adds a new report
+         * @param addReportDto - the report to add
+         * @return a response containing the added report
+         */
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddReportDto addReportDto)
         {
