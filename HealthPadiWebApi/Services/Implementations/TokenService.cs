@@ -22,6 +22,7 @@ namespace HealthPadiBackend.Services.Implementations
             var claims = new List<Claim>();
 
             claims.Add(new Claim(ClaimTypes.Email, user.Email));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
 
 
             //Iterating through each roles and adding claims to each

@@ -6,12 +6,13 @@ using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthPadiWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    /* [Authorize(AuthenticationSchemes = "Bearer")]*/
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
@@ -71,7 +72,12 @@ namespace HealthPadiWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddReportDto addReportDto)
         {
-            var report = await _reportService.AddReportAsync(addReportDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var report = await _reportService.AddReportAsync(addReportDto, Guid.Parse(userId));
             return CreatedAtAction(nameof(GetById), new { id = report.ReportId }, report);
         }
 

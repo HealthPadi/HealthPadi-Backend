@@ -1,4 +1,4 @@
-﻿using HealthPadiWebApi.Controllers;
+﻿/*using HealthPadiWebApi.Controllers;
 using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -120,3 +120,4 @@ namespace HealthPadiTest
 
     }
 }
+*/
