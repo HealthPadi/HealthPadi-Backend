@@ -5,8 +5,6 @@ using Azure;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
 
-
-
 namespace HealthPadiWebApi.Services.Implementations
 {
     public class AIService : IAIService
@@ -27,7 +25,7 @@ namespace HealthPadiWebApi.Services.Implementations
             _chatClient = _azureClient.GetChatClient(_configuration["AzureConfig:OpenAI:ChatEngine"]);
             _healthyLivingTopicsService = healthyLivingTopicsService;
         }
-        
+
         /**
          * GenerateHealthFeeds - Generates health feeds on a given topic
          * @return a string containing the health feeds
@@ -36,7 +34,7 @@ namespace HealthPadiWebApi.Services.Implementations
         {
             try
             {
-                var topic = await _healthyLivingTopicsService.GetOneTopic() ?? throw new InvalidOperationException("No more topics available"); 
+                var topic = await _healthyLivingTopicsService.GetOneTopic() ?? throw new InvalidOperationException("No more topics available");
 
                 var systemMessage = new Models.ChatMessage
                 {
@@ -87,7 +85,7 @@ namespace HealthPadiWebApi.Services.Implementations
                 {
                     Role = "system",
                     Content = "You are a helpful AI health assistant. You provide a summary of whatever health report you are given" +
-                    "Each summarized report should be between 50 and 100 words." 
+                    "Each summarized report should be between 50 and 100 words."
                 };
 
                 var userMessage = new Models.ChatMessage()
