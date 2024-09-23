@@ -37,18 +37,25 @@ namespace HealthPadiWebApi.Services.Implementations
             return _mapper.Map<ReportDto>(report);
         }
 
-        public async Task<ReportDto> AddReportAsync(AddReportDto addReportDto, Guid userId)
+        public async Task<(bool isSuccess, string? message, ReportDto report)> AddReportAsync(AddReportDto addReportDto, Guid userId)
         {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                return (false, "User not found", null);
+            }
+            if (user.IsDisabled)
+            {
+                return (false, "User is disabled and cannot create reports", null);
+            }
             var report = _mapper.Map<Report>(addReportDto);
             await _unitOfWork.Report.AddAsync(report);
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user != null)
-            {
-                user.Point += 100;
-                await _userManager.UpdateAsync(user);
-            }
+
+            user.Point += 100;
+            await _userManager.UpdateAsync(user);
+
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<ReportDto>(report);
+            return (true, null, _mapper.Map<ReportDto>(report));
         }
 
         public async Task<ReportDto> DeleteReportAsync(Guid id)

@@ -5,9 +5,9 @@ namespace HealthPadiWebApi.Services.Interfaces
 {
     public interface IReportService
     {
+        Task<(bool isSuccess, string? message, ReportDto report)> AddReportAsync(AddReportDto addReportDto, Guid userId);
         Task<List<ReportDto>> GetAllReportsAsync(string location);
         Task<ReportDto> GetReportByIdAsync(Guid id);
-        Task<ReportDto> AddReportAsync(AddReportDto addReportDto, Guid userId);
         Task<ReportDto> DeleteReportAsync(Guid id);
     }
 }
