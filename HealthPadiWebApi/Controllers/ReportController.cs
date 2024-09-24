@@ -4,14 +4,14 @@ using HealthPadiWebApi.DTOs.Response;
 using HealthPadiWebApi.DTOs.Shared;
 using HealthPadiWebApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthPadiWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    /* [Authorize(AuthenticationSchemes = "Bearer")]*/
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
@@ -62,7 +62,6 @@ namespace HealthPadiWebApi.Controllers
             return Ok(ApiResponse.SuccessMessageWithData(aiResponse));
         }
 
-
         /**
          * Add - Adds a new report
          * @param addReportDto - the report to add
@@ -71,7 +70,30 @@ namespace HealthPadiWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddReportDto addReportDto)
         {
-            var report = await _reportService.AddReportAsync(addReportDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            // Call the service to add the report
+            var (isSuccess, message, report) = await _reportService.AddReportAsync(addReportDto, Guid.Parse(userId));
+
+            // Handle cases where the service returns failure
+            if (!isSuccess)
+            {
+                if (message == "User not found")
+                {
+                    return NotFound(message);
+                }
+                else if (message == "User is disabled and cannot create reports")
+                {
+                    return BadRequest(message);
+                }
+            }
+
+            // Return created report
             return CreatedAtAction(nameof(GetById), new { id = report.ReportId }, report);
         }
 
